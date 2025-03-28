@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+ai_promt.md
+plan.md
+
 # Test binary, built with `go test -c`
 *.test
 
