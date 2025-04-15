@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package = "proto/extra";
+
+message ExtraTx {
+  string gasPrice = 1;
+  string gas = 2;
+  string nonce = 3;
+  string transactionIndex = 4;
+  string blockHash = 5;
+}
+
+message ExtraBlock {
+  repeated uncle uncles = 1;
+  string blockHash = 2;
+  string gasUsed = 3;
+  string gasLimit = 4;
+  string difficulty = 5;
+  string extraData = 6;
+  string hash = 7;
+  string nonce = 8;
+  string miner = 9;
+  string stateRoot = 10;
+  string receiptsRoot = 11;
+  string transactionsRoot = 12;
+  string sha3Uncles = 13;
+  string parentHash = 14;
+  string logsBloom = 15;
+}
+
+message uncle {
+  string hash = 1;
+}
