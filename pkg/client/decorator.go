@@ -43,11 +43,6 @@ import (
 //GasPrice                    Method = "eth_gasPrice"
 //Subscribe                   Method = "eth_subscribe"
 //Unsubscribe                 Method = "eth_unsubscribe"
-//Latest                             = "latest"
-//Pending                            = "pending"
-//Earliest                           = "earliest"
-//Safe                               = "safe"
-//Finalized                          = "finalized"
 
 func (c *Client) BlockByNumber(ctx context.Context, number *big.Int) (res *models.Block, err error) {
 	return res, c.Call(ctx, res, methods.BlockByNumber, number, true)

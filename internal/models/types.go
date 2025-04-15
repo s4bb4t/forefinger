@@ -24,6 +24,7 @@ const (
 	gasLimit     = "gasLimit"
 	diff         = "difficulty"
 	extraData    = "extraData"
+	data         = "data"
 	miner        = "miner"
 	stateRoot    = "stateRoot"
 	receiptsRoot = "receiptsRoot"
@@ -33,10 +34,9 @@ const (
 	logsBloom    = "logsBloom"
 	uncles       = "uncles"
 
-	removed     = "removed"
-	topics      = "topics"
-	logIdx      = "logIndex"
-	blockNumber = "blockNumber"
-	txHash      = "transactionHash"
-	address     = "address"
+	removed = "removed"
+	topics  = "topics"
+	logIdx  = "logIndex"
+	txHash  = "transactionHash"
+	address = "address"
 )

@@ -15,15 +15,15 @@ type (
 	}
 
 	innerTx struct {
-		BlockNumber *big.Int    `json:"blockNumber"`
-		Value       *big.Int    `json:"value"`
-		V           *big.Int    `json:"v"`
-		R           *big.Int    `json:"r"`
-		S           *big.Int    `json:"s"`
-		Input       common.Hash `json:"input"`
-		Hash        common.Hash `json:"hash"`
-		From        common.Hash `json:"from"`
-		To          common.Hash `json:"to"`
+		BlockNumber *big.Int       `json:"blockNumber"`
+		Value       *big.Int       `json:"value"`
+		V           *big.Int       `json:"v"`
+		R           *big.Int       `json:"r"`
+		S           *big.Int       `json:"s"`
+		Input       common.Hash    `json:"input"`
+		Hash        common.Hash    `json:"hash"`
+		From        common.Address `json:"from"`
+		To          common.Address `json:"to"`
 	}
 
 	Transaction struct {
@@ -82,9 +82,9 @@ func (t *Transaction) UnmarshalEasyJSON(w *jlexer.Lexer) {
 		case hash:
 			t.inner.Hash = common.HexToHash(w.String())
 		case from:
-			t.inner.From = common.HexToHash(w.String())
+			t.inner.From = common.HexToAddress(w.String())
 		case to:
-			t.inner.To = common.HexToHash(w.String())
+			t.inner.To = common.HexToAddress(w.String())
 		case input:
 			t.inner.Input = common.HexToHash(w.String())
 		default:
@@ -136,12 +136,12 @@ func (t *Transaction) Hash() common.Hash {
 }
 
 // From returns the sender's address of the transaction as a common.Hash.
-func (t *Transaction) From() common.Hash {
+func (t *Transaction) From() common.Address {
 	return t.inner.From
 }
 
 // To returns the recipient address of the transaction as a common.Hash.
-func (t *Transaction) To() common.Hash {
+func (t *Transaction) To() common.Address {
 	return t.inner.To
 }
 

@@ -86,10 +86,7 @@ func (b *Block) UnmarshalEasyJSON(w *jlexer.Lexer) {
 }
 
 func (b *Block) UnmarshalJSON(bytes []byte) error {
-	if err := easyjson.Unmarshal(bytes, b); err != nil {
-		return fmt.Errorf("forefinger: block data unmarshaling error: %w", err)
-	}
-	return nil
+	return easyjson.Unmarshal(bytes, b)
 }
 
 func (b *Block) Number() *big.Int {
@@ -145,6 +142,7 @@ func (b *Block) StateRoot() (string, error) {
 	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
 		return "", err
 	}
+	return res.StateRoot, nil
 }
 
 func (b *Block) ReceiptsRoot() (string, error) {
@@ -152,6 +150,7 @@ func (b *Block) ReceiptsRoot() (string, error) {
 	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
 		return "", err
 	}
+	return res.ReceiptsRoot, nil
 }
 
 func (b *Block) TransactionsRoot() (string, error) {
