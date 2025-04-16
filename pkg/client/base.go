@@ -4,8 +4,24 @@ import (
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/mailru/easyjson"
+	"github.com/mailru/easyjson/jlexer"
 	"github.com/s4bb4t/forefinger/pkg/methods"
+	"math/big"
 )
+
+type Int struct {
+	n *big.Int
+}
+
+func (i *Int) UnmarshalJSON(data []byte) error {
+	return easyjson.Unmarshal(data, i)
+}
+
+func (i *Int) UnmarshalEasyJSON(w *jlexer.Lexer) {
+	i.n = big.NewInt(0)
+	i.n.SetString(w.String(), 0)
+}
 
 func (c *Client) Call(ctx context.Context, res any, method methods.Method, args ...any) error {
 	cl, release := c.client()

@@ -1,5 +1,10 @@
 package models
 
+import (
+	"github.com/mailru/easyjson"
+	"github.com/mailru/easyjson/jlexer"
+)
+
 const (
 	blockNum  = "blockNumber"
 	gasPrice  = "gasPrice"
@@ -32,7 +37,14 @@ const (
 	sha3Uncles   = "sha3Uncles"
 	parentHash   = "parentHash"
 	logsBloom    = "logsBloom"
-	uncles       = "uncles"
+
+	cumulativeGasUsed = "cumulativeGasUsed"
+	effectiveGasPrice = "effectiveGasPrice"
+	type_             = "type"
+	status            = "status"
+	root              = "root"
+	contractAddress   = "contractAddress"
+	logs              = "logs"
 
 	removed = "removed"
 	topics  = "topics"
@@ -40,3 +52,15 @@ const (
 	txHash  = "transactionHash"
 	address = "address"
 )
+
+type Code struct {
+	Value []byte
+}
+
+func (c *Code) UnmarshalEasyJSON(w *jlexer.Lexer) {
+	c.Value = w.Raw()
+}
+
+func (c *Code) UnmarshalJSON(b []byte) error {
+	return easyjson.Unmarshal(b, c)
+}

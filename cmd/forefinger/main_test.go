@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/s4bb4t/forefinger/internal/models"
 	"github.com/s4bb4t/forefinger/pkg/client"
 	"github.com/s4bb4t/forefinger/pkg/methods"
+	"github.com/s4bb4t/forefinger/pkg/models"
 	"math/big"
 	"testing"
 )

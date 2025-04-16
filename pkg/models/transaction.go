@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/mailru/easyjson"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/s4bb4t/forefinger/proto/extra"
 	"google.golang.org/protobuf/proto"
@@ -15,15 +16,15 @@ type (
 	}
 
 	innerTx struct {
-		BlockNumber *big.Int       `json:"blockNumber"`
-		Value       *big.Int       `json:"value"`
-		V           *big.Int       `json:"v"`
-		R           *big.Int       `json:"r"`
-		S           *big.Int       `json:"s"`
-		Input       common.Hash    `json:"input"`
-		Hash        common.Hash    `json:"hash"`
-		From        common.Address `json:"from"`
-		To          common.Address `json:"to"`
+		BlockNumber *big.Int
+		Value       *big.Int
+		V           *big.Int
+		R           *big.Int
+		S           *big.Int
+		Input       common.Hash
+		Hash        common.Hash
+		From        common.Address
+		To          common.Address
 	}
 
 	Transaction struct {
@@ -33,6 +34,14 @@ type (
 
 	Transactions []Transaction
 )
+
+func (t *Transactions) UnmarshalJSON(bytes []byte) error {
+	return easyjson.Unmarshal(bytes, t)
+}
+
+func (t *Transaction) UnmarshalJSON(bytes []byte) error {
+	return easyjson.Unmarshal(bytes, t)
+}
 
 func (t *Transactions) UnmarshalEasyJSON(w *jlexer.Lexer) {
 	w.Delim('[')
