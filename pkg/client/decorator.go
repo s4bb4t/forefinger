@@ -114,18 +114,19 @@ func (c *Client) EstimateGas(ctx context.Context, data []byte, block *big.Int) (
 }
 
 // Logs fetches logs for a given address, optional topics, and a specific block number within the blockchain system.
-func (c *Client) Logs(ctx context.Context, address common.Address, topics [][]common.Hash, block *big.Int) (*models.Logs, error) {
+func (c *Client) Logs(ctx context.Context, f *models.Filter) (*models.Logs, error) {
+	if _, err := f.Validate(); err != nil {
+		return nil, err
+	}
+
 	var res models.Logs
-	return &res, c.Call(ctx, &res, methods.Logs, map[string]interface{}{
-		"address": address.Hex(),
-		"topics":  topics,
-	}, block)
+	return &res, c.Call(ctx, &res, methods.Logs, f)
 }
 
 // NewFilter creates and installs a new filter with the specified arguments, returning the filter ID and an error if any.
-func (c *Client) NewFilter(ctx context.Context, args map[string]interface{}) (*big.Int, error) {
+func (c *Client) NewFilter(ctx context.Context, f *models.Filter) (*big.Int, error) {
 	var res Int
-	return res.n, c.Call(ctx, &res, methods.NewFilter, args)
+	return res.n, c.Call(ctx, &res, methods.NewFilter, f)
 }
 
 // NewBlockFilter creates a new filter in the node for new block headers and returns the filter ID and an error if any.

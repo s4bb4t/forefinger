@@ -297,6 +297,82 @@ func (x *Uncle) GetHash() string {
 	return ""
 }
 
+type ExtraReceipt struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	LogsBloom         string                 `protobuf:"bytes,1,opt,name=logsBloom,proto3" json:"logsBloom,omitempty"`
+	Root              string                 `protobuf:"bytes,2,opt,name=root,proto3" json:"root,omitempty"`
+	EffectiveGasPrice string                 `protobuf:"bytes,3,opt,name=effectiveGasPrice,proto3" json:"effectiveGasPrice,omitempty"`
+	CumulativeGasUsed string                 `protobuf:"bytes,4,opt,name=cumulativeGasUsed,proto3" json:"cumulativeGasUsed,omitempty"`
+	GasUsed           string                 `protobuf:"bytes,5,opt,name=gasUsed,proto3" json:"gasUsed,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ExtraReceipt) Reset() {
+	*x = ExtraReceipt{}
+	mi := &file_extra_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExtraReceipt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExtraReceipt) ProtoMessage() {}
+
+func (x *ExtraReceipt) ProtoReflect() protoreflect.Message {
+	mi := &file_extra_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExtraReceipt.ProtoReflect.Descriptor instead.
+func (*ExtraReceipt) Descriptor() ([]byte, []int) {
+	return file_extra_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ExtraReceipt) GetLogsBloom() string {
+	if x != nil {
+		return x.LogsBloom
+	}
+	return ""
+}
+
+func (x *ExtraReceipt) GetRoot() string {
+	if x != nil {
+		return x.Root
+	}
+	return ""
+}
+
+func (x *ExtraReceipt) GetEffectiveGasPrice() string {
+	if x != nil {
+		return x.EffectiveGasPrice
+	}
+	return ""
+}
+
+func (x *ExtraReceipt) GetCumulativeGasUsed() string {
+	if x != nil {
+		return x.CumulativeGasUsed
+	}
+	return ""
+}
+
+func (x *ExtraReceipt) GetGasUsed() string {
+	if x != nil {
+		return x.GasUsed
+	}
+	return ""
+}
+
 var File_extra_proto protoreflect.FileDescriptor
 
 const file_extra_proto_rawDesc = "" +
@@ -333,7 +409,13 @@ const file_extra_proto_rawDesc = "" +
 	"parentHash\x12\x1c\n" +
 	"\tlogsBloom\x18\x0f \x01(\tR\tlogsBloom\"\x1b\n" +
 	"\x05uncle\x12\x12\n" +
-	"\x04hash\x18\x01 \x01(\tR\x04hashB\rZ\vproto/extrab\x06proto3"
+	"\x04hash\x18\x01 \x01(\tR\x04hash\"\xb6\x01\n" +
+	"\fExtraReceipt\x12\x1c\n" +
+	"\tlogsBloom\x18\x01 \x01(\tR\tlogsBloom\x12\x12\n" +
+	"\x04root\x18\x02 \x01(\tR\x04root\x12,\n" +
+	"\x11effectiveGasPrice\x18\x03 \x01(\tR\x11effectiveGasPrice\x12,\n" +
+	"\x11cumulativeGasUsed\x18\x04 \x01(\tR\x11cumulativeGasUsed\x12\x18\n" +
+	"\agasUsed\x18\x05 \x01(\tR\agasUsedB\rZ\vproto/extrab\x06proto3"
 
 var (
 	file_extra_proto_rawDescOnce sync.Once
@@ -347,11 +429,12 @@ func file_extra_proto_rawDescGZIP() []byte {
 	return file_extra_proto_rawDescData
 }
 
-var file_extra_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_extra_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_extra_proto_goTypes = []any{
-	(*ExtraTx)(nil),    // 0: ExtraTx
-	(*ExtraBlock)(nil), // 1: ExtraBlock
-	(*Uncle)(nil),      // 2: uncle
+	(*ExtraTx)(nil),      // 0: ExtraTx
+	(*ExtraBlock)(nil),   // 1: ExtraBlock
+	(*Uncle)(nil),        // 2: uncle
+	(*ExtraReceipt)(nil), // 3: ExtraReceipt
 }
 var file_extra_proto_depIdxs = []int32{
 	2, // 0: ExtraBlock.uncles:type_name -> uncle
@@ -373,7 +456,7 @@ func file_extra_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_extra_proto_rawDesc), len(file_extra_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

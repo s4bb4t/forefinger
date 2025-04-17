@@ -10,6 +10,8 @@ import (
 	"math/big"
 )
 
+var exTxShared extra.ExtraTx
+
 type (
 	extraTx struct {
 		Data []byte
@@ -154,42 +156,53 @@ func (t *Transaction) To() common.Address {
 	return t.inner.To
 }
 
-func (t *Transaction) GasPrice() (string, error) {
-	var res extra.ExtraTx
-	if err := proto.Unmarshal(t.extra.Data, &res); err != nil {
-		return "", err
+func (t *Transaction) GasPrice() (*big.Int, error) {
+	if err := proto.Unmarshal(t.extra.Data, &exTxShared); err != nil {
+		return nil, err
 	}
-	return res.GasPrice, nil
+	g, ok := big.NewInt(0).SetString(exTxShared.GasPrice, 0)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse gas price")
+	}
+	return g, nil
 }
 
-func (t *Transaction) Gas() (string, error) {
-	var res extra.ExtraTx
-	if err := proto.Unmarshal(t.extra.Data, &res); err != nil {
-		return "", err
+func (t *Transaction) Gas() (*big.Int, error) {
+	if err := proto.Unmarshal(t.extra.Data, &exTxShared); err != nil {
+		return nil, err
 	}
-	return res.Gas, nil
+	g, ok := big.NewInt(0).SetString(exTxShared.Gas, 0)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse gas")
+	}
+	return g, nil
 }
 
-func (t *Transaction) Nonce() (string, error) {
-	var res extra.ExtraTx
-	if err := proto.Unmarshal(t.extra.Data, &res); err != nil {
-		return "", err
+func (t *Transaction) Nonce() (*big.Int, error) {
+	if err := proto.Unmarshal(t.extra.Data, &exTxShared); err != nil {
+		return nil, err
 	}
-	return res.Nonce, nil
+	n, ok := big.NewInt(0).SetString(exTxShared.Nonce, 0)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse nonce")
+	}
+	return n, nil
 }
 
-func (t *Transaction) TransactionIndex() (string, error) {
-	var res extra.ExtraTx
-	if err := proto.Unmarshal(t.extra.Data, &res); err != nil {
-		return "", err
+func (t *Transaction) TransactionIndex() (*big.Int, error) {
+	if err := proto.Unmarshal(t.extra.Data, &exTxShared); err != nil {
+		return nil, err
 	}
-	return res.TransactionIndex, nil
+	i, ok := big.NewInt(0).SetString(exTxShared.TransactionIndex, 0)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse transaction index")
+	}
+	return i, nil
 }
 
-func (t *Transaction) BlockHash() (string, error) {
-	var res extra.ExtraTx
-	if err := proto.Unmarshal(t.extra.Data, &res); err != nil {
-		return "", err
+func (t *Transaction) BlockHash() (common.Hash, error) {
+	if err := proto.Unmarshal(t.extra.Data, &exTxShared); err != nil {
+		return common.Hash{}, err
 	}
-	return res.BlockHash, nil
+	return common.HexToHash(exTxShared.BlockHash), nil
 }

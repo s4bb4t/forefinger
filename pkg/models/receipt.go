@@ -1,30 +1,35 @@
 package models
 
 import (
+	"errors"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mailru/easyjson"
 	"github.com/mailru/easyjson/jlexer"
+	"github.com/s4bb4t/forefinger/proto/extra"
+	"google.golang.org/protobuf/proto"
 	"math/big"
 )
 
+var exReceiptShared extra.ExtraReceipt
+
 type (
+	extraReceipt struct {
+		Data []byte
+	}
 	innerReceipt struct {
-		TransactionHash   common.Hash
-		LogsBloom         common.Hash
-		Root              common.Hash
-		From              common.Address
-		To                common.Address
-		ContractAddress   common.Address
-		TransactionIndex  *big.Int
-		BlockNumber       *big.Int
-		CumulativeGasUsed *big.Int
-		EffectiveGasPrice *big.Int
-		GasUsed           *big.Int
-		Type              *big.Int
-		Status            *big.Int
-		Logs              Logs
+		TransactionHash  common.Hash
+		From             common.Address
+		To               common.Address
+		ContractAddress  common.Address
+		TransactionIndex *big.Int
+		BlockNumber      *big.Int
+		Type             *big.Int
+		Status           *big.Int
+		Logs             Logs
 	}
 	Receipt struct {
+		extra extraReceipt
 		inner innerReceipt
 	}
 
@@ -32,11 +37,9 @@ type (
 )
 
 func (r *Receipt) UnmarshalEasyJSON(w *jlexer.Lexer) {
+	var ex extra.ExtraReceipt
 	r.inner.TransactionIndex = big.NewInt(0)
 	r.inner.BlockNumber = big.NewInt(0)
-	r.inner.CumulativeGasUsed = big.NewInt(0)
-	r.inner.EffectiveGasPrice = big.NewInt(0)
-	r.inner.GasUsed = big.NewInt(0)
 	r.inner.Type = big.NewInt(0)
 	r.inner.Status = big.NewInt(0)
 	w.Delim('{')
@@ -52,25 +55,25 @@ func (r *Receipt) UnmarshalEasyJSON(w *jlexer.Lexer) {
 			if w.IsNull() {
 				w.Skip()
 			} else {
-				r.inner.CumulativeGasUsed.SetString(w.String(), 0)
+				ex.CumulativeGasUsed = w.String()
 			}
 		case effectiveGasPrice:
-			r.inner.EffectiveGasPrice.SetString(w.String(), 0)
+			ex.EffectiveGasPrice = w.String()
 		case gasUsed:
-			r.inner.GasUsed.SetString(w.String(), 0)
+			ex.GasUsed = w.String()
+		case logsBloom:
+			ex.LogsBloom = w.String()
+		case root:
+			ex.Root = w.String()
+
 		case type_:
 			r.inner.Type.SetString(w.String(), 0)
 		case status:
 			r.inner.Status.SetString(w.String(), 0)
-
 		case from:
 			r.inner.From = common.BytesToAddress(w.Raw())
 		case to:
 			r.inner.To = common.BytesToAddress(w.Raw())
-		case logsBloom:
-			r.inner.LogsBloom = common.BytesToHash(w.Raw())
-		case root:
-			r.inner.Root = common.BytesToHash(w.Raw())
 		case txHash:
 			r.inner.TransactionHash = common.BytesToHash(w.Raw())
 		case logs:
@@ -88,6 +91,11 @@ func (r *Receipt) UnmarshalEasyJSON(w *jlexer.Lexer) {
 		w.WantComma()
 	}
 	w.Delim('}')
+	d, err := proto.Marshal(&ex)
+	if err != nil {
+		w.AddError(fmt.Errorf("extraData marshaling error: %w", err))
+	}
+	r.extra.Data = d
 }
 
 func (r *Receipts) UnmarshalEasyJSON(w *jlexer.Lexer) {
@@ -117,16 +125,37 @@ func (r *Receipt) BlockNumber() *big.Int {
 	return big.NewInt(0).Set(r.inner.BlockNumber)
 }
 
-func (r *Receipt) CumulativeGasUsed() *big.Int {
-	return big.NewInt(0).Set(r.inner.CumulativeGasUsed)
+func (r *Receipt) CumulativeGasUsed() (*big.Int, error) {
+	if err := proto.Unmarshal(r.extra.Data, &exReceiptShared); err != nil {
+		return nil, err
+	}
+	g, ok := big.NewInt(0).SetString(exReceiptShared.CumulativeGasUsed, 0)
+	if !ok {
+		return nil, errors.New("failed to parse cumulative gas used")
+	}
+	return g, nil
 }
 
-func (r *Receipt) EffectiveGasPrice() *big.Int {
-	return big.NewInt(0).Set(r.inner.EffectiveGasPrice)
+func (r *Receipt) EffectiveGasPrice() (*big.Int, error) {
+	if err := proto.Unmarshal(r.extra.Data, &exReceiptShared); err != nil {
+		return nil, err
+	}
+	g, ok := big.NewInt(0).SetString(exReceiptShared.EffectiveGasPrice, 0)
+	if !ok {
+		return nil, errors.New("failed to parse cumulative gas used")
+	}
+	return g, nil
 }
 
-func (r *Receipt) GasUsed() *big.Int {
-	return big.NewInt(0).Set(r.inner.GasUsed)
+func (r *Receipt) GasUsed() (*big.Int, error) {
+	if err := proto.Unmarshal(r.extra.Data, &exReceiptShared); err != nil {
+		return nil, err
+	}
+	g, ok := big.NewInt(0).SetString(exReceiptShared.GasUsed, 0)
+	if !ok {
+		return nil, errors.New("failed to parse cumulative gas used")
+	}
+	return g, nil
 }
 
 func (r *Receipt) Type() *big.Int {
@@ -149,12 +178,18 @@ func (r *Receipt) ContractAddress() common.Address {
 	return r.inner.ContractAddress
 }
 
-func (r *Receipt) LogsBloom() common.Hash {
-	return r.inner.LogsBloom
+func (r *Receipt) LogsBloom() (common.Hash, error) {
+	if err := proto.Unmarshal(r.extra.Data, &exReceiptShared); err != nil {
+		return common.Hash{}, err
+	}
+	return common.HexToHash(exReceiptShared.LogsBloom), nil
 }
 
-func (r *Receipt) Root() common.Hash {
-	return r.inner.Root
+func (r *Receipt) Root() (common.Hash, error) {
+	if err := proto.Unmarshal(r.extra.Data, &exReceiptShared); err != nil {
+		return common.Hash{}, err
+	}
+	return common.HexToHash(exReceiptShared.Root), nil
 }
 
 func (r *Receipt) TransactionHash() common.Hash {

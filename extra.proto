@@ -31,3 +31,11 @@ message ExtraBlock {
 message uncle {
   string hash = 1;
 }
+
+message ExtraReceipt{
+  string logsBloom = 1;
+  string root = 2;
+  string effectiveGasPrice = 3;
+  string cumulativeGasUsed = 4;
+  string gasUsed = 5;
+}

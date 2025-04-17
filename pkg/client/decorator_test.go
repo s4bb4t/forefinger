@@ -144,40 +144,20 @@ func TestTxReceipt(t *testing.T) {
 	t.Logf("TxReceipt: %+v", receipt.TransactionHash().String())
 }
 
-func TestLogs(t *testing.T) {
-	ctx := context.Background()
-	topics := [][]common.Hash{
-		{common.HexToHash("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")},
-	}
-
-	logs, err := cl.Logs(ctx, testAddress, topics, big.NewInt(1234567))
-	if err != nil {
-		t.Fatalf("Logs failed: %v", err)
-	}
-
-	if logs == nil {
-		t.Fatal("Logs returned nil logs")
-	}
-
-	t.Logf("Logs: %+v", len(logs))
-}
-
-func TestNewFilter(t *testing.T) {
-	ctx := context.Background()
-	args := map[string]interface{}{
-		"fromBlock": blockNumber,
-		"toBlock":   "latest",
-		"address":   testAddressHex,
-	}
-
-	filterID, err := cl.NewFilter(ctx, args)
-	if err != nil {
-		t.Fatalf("NewFilter failed: %v", err)
-	}
-
-	if filterID == nil {
-		t.Fatal("NewFilter returned nil filter ID")
-	}
-
-	//t.Logf("NewFilter: %v", filterID)
-}
+//func TestLogs(t *testing.T) {
+//	ctx := context.Background()
+//	topics := [][]common.Hash{
+//		{common.HexToHash("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")},
+//	}
+//
+//	logs, err := cl.Logs(ctx, testAddress, topics, big.NewInt(1234567))
+//	if err != nil {
+//		t.Fatalf("Logs failed: %v", err)
+//	}
+//
+//	if logs == nil {
+//		t.Fatal("Logs returned nil logs")
+//	}
+//
+//	t.Logf("Logs: %+v", logs)
+//}

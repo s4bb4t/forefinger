@@ -11,14 +11,14 @@ type (
 	Topics []common.Hash
 
 	innerLog struct {
-		Removed          bool        `json:"removed"`
-		Data             []byte      `json:"data"`
-		Topics           Topics      `json:"topics"`
-		LogIndex         *big.Int    `json:"logIndex"`
-		TransactionIndex *big.Int    `json:"transactionIndex"`
-		BlockNumber      *big.Int    `json:"blockNumber"`
-		TransactionHash  common.Hash `json:"transactionHash"`
-		Address          common.Hash `json:"address"`
+		Removed          bool
+		Data             []byte
+		Topics           Topics
+		LogIndex         *big.Int
+		TransactionIndex *big.Int
+		BlockNumber      *big.Int
+		TransactionHash  common.Hash
+		Address          common.Hash
 	}
 
 	Log struct {
@@ -27,6 +27,10 @@ type (
 
 	Logs []Log
 )
+
+func (l *Logs) Indirect() Logs {
+	return *l
+}
 
 func (l *Logs) UnmarshalEasyJSON(w *jlexer.Lexer) {
 	w.Delim('[')

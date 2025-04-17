@@ -105,6 +105,11 @@ func (f *Filter) ToBlock(val any) *Filter {
 	return f
 }
 
+func (f *Filter) Topic(hash string) *Filter {
+	f.AddTopic(common.HexToHash(hash))
+	return f
+}
+
 // AddTopic appends topics to the filter's topic criteria for Ethereum logs.
 // Topics are processed in order and are position-dependent:
 // - The first topic added matches the logs' first indexed topic.
@@ -135,6 +140,13 @@ func (f *Filter) AddTopic(val any) *Filter {
 	return f
 }
 
+// Address adds an address to Filter.
+// Alias for AddAddress but accepts a string instead
+func (f *Filter) Address(addr string) *Filter {
+	f.address.addr = append(f.address.addr, common.HexToAddress(addr))
+	return f
+}
+
 // AddAddress appends an Ethereum address to the filter's address list.
 func (f *Filter) AddAddress(addr common.Address) *Filter {
 	f.address.addr = append(f.address.addr, addr)
@@ -148,11 +160,11 @@ func (f *Filter) AddAddresses(addr []common.Address) *Filter {
 }
 
 // Validate checks for errors in the Filter configuration and wraps them in a prefixed error string if any exist.
-func (f *Filter) Validate() error {
+func (f *Filter) Validate() (*Filter, error) {
 	if f._err != nil {
-		return fmt.Errorf("forefinger: filter: %w", f._err)
+		return f, fmt.Errorf("forefinger: filter: %w", f._err)
 	}
-	return nil
+	return f, nil
 }
 
 // setRangeString updates the block range as a tag (e.g., "earliest", "latest").
@@ -164,7 +176,7 @@ func (f *Filter) setRangeString(tag string, isFromBlock bool) {
 			f.fromBlock.tag = tag
 			f.fromBlock.tagSwitch.CompareAndSwap(false, true)
 		default:
-			if i, ok := big.NewInt(-1).SetString(v, 0); ok {
+			if i, ok := big.NewInt(-1).SetString(tag, 0); ok {
 				f.setRangeInt(i, isFromBlock)
 			} else {
 				f.addError(fmt.Errorf("invalid fromBlock tag: %s", tag))
@@ -176,7 +188,7 @@ func (f *Filter) setRangeString(tag string, isFromBlock bool) {
 			f.toBlock.tag = tag
 			f.toBlock.tagSwitch.CompareAndSwap(false, true)
 		default:
-			if i, ok := big.NewInt(-1).SetString(v, 0); ok {
+			if i, ok := big.NewInt(-1).SetString(tag, 0); ok {
 				f.setRangeInt(i, isFromBlock)
 			} else {
 				f.addError(fmt.Errorf("invalid toBlock tag: %s", tag))
@@ -203,14 +215,14 @@ func (f *Filter) addError(err error) {
 }
 
 func (f *Filter) MarshalJSON() ([]byte, error) {
-	if err := f.Validate(); err != nil {
+	if _, err := f.Validate(); err != nil {
 		return nil, err
 	}
 	return easyjson.Marshal(f)
 }
 
 func (f *Filter) UnmarshalJSON(data []byte) error {
-	if err := f.Validate(); err != nil {
+	if _, err := f.Validate(); err != nil {
 		return err
 	}
 

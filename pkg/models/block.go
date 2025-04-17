@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/mailru/easyjson"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/s4bb4t/forefinger/proto/extra"
@@ -9,16 +10,18 @@ import (
 	"math/big"
 )
 
+var exBlockShared extra.ExtraBlock
+
 type (
 	extraBlock struct {
 		Data []byte
 	}
 
 	inner struct {
-		Transactions Transactions `json:"transactions"`
-		Timestamp    *big.Int     `json:"timestamp"`
-		Number       *big.Int     `json:"number"`
-		Size         *big.Int     `json:"size"`
+		Transactions Transactions
+		Timestamp    *big.Int
+		Number       *big.Int
+		Size         *big.Int
 	}
 
 	Block struct {
@@ -77,12 +80,12 @@ func (b *Block) UnmarshalEasyJSON(w *jlexer.Lexer) {
 		}
 		w.WantComma()
 	}
+	w.Delim('}')
 	d, err := proto.Marshal(&ex)
 	if err != nil {
 		w.AddError(fmt.Errorf("extraData marshaling error: %w", err))
 	}
 	b.extra.Data = d
-	w.Delim('}')
 }
 
 func (b *Block) UnmarshalJSON(bytes []byte) error {
@@ -105,106 +108,98 @@ func (b *Block) Transactions() Transactions {
 	return b.inner.Transactions
 }
 
-func (b *Block) ExtraData() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) ExtraData() ([]byte, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return nil, err
 	}
-	return res.ExtraData, nil
+	return []byte(exBlockShared.ExtraData), nil
 }
 
-func (b *Block) Hash() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) Hash() (common.Hash, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return common.Hash{}, err
 	}
-	return res.Hash, nil
+	return common.HexToHash(exBlockShared.Hash), nil
 }
 
-func (b *Block) Miner() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) Miner() (common.Address, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return common.Address{}, err
 	}
-	return res.Miner, nil
+	return common.HexToAddress(exBlockShared.Miner), nil
 }
 
-func (b *Block) Nonce() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) Nonce() (common.Hash, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return common.Hash{}, err
 	}
-	return res.Nonce, nil
+	return common.HexToHash(exBlockShared.Nonce), nil
 }
 
-func (b *Block) StateRoot() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) StateRoot() (common.Hash, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return common.Hash{}, err
 	}
-	return res.StateRoot, nil
+	return common.HexToHash(exBlockShared.StateRoot), nil
 }
 
-func (b *Block) ReceiptsRoot() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) ReceiptsRoot() (common.Hash, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return common.Hash{}, err
 	}
-	return res.ReceiptsRoot, nil
+	return common.HexToHash(exBlockShared.ReceiptsRoot), nil
 }
 
-func (b *Block) TransactionsRoot() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) TxsRoot() (common.Hash, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return common.Hash{}, err
 	}
-	return res.TransactionsRoot, nil
+	return common.HexToHash(exBlockShared.TransactionsRoot), nil
 }
 
-func (b *Block) Sha3Uncles() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) Sha3Uncles() (common.Hash, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return common.Hash{}, err
 	}
-	return res.Sha3Uncles, nil
+	return common.HexToHash(exBlockShared.Sha3Uncles), nil
 }
 
-func (b *Block) ParentHash() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) ParentHash() (common.Hash, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return common.Hash{}, err
 	}
-	return res.ParentHash, nil
+	return common.HexToHash(exBlockShared.ParentHash), nil
 }
 
-func (b *Block) LogsBloom() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) Difficulty() (*big.Int, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return nil, err
 	}
-	return res.LogsBloom, nil
+	g, ok := big.NewInt(0).SetString(exBlockShared.Difficulty, 0)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse difficulty")
+	}
+	return g, nil
 }
 
-func (b *Block) Difficulty() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) GasLimit() (*big.Int, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return nil, err
 	}
-	return res.Difficulty, nil
+	g, ok := big.NewInt(0).SetString(exBlockShared.GasLimit, 0)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse difficulty")
+	}
+	return g, nil
 }
 
-func (b *Block) GasLimit() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+func (b *Block) GasUsed() (*big.Int, error) {
+	if err := proto.Unmarshal(b.extra.Data, &exBlockShared); err != nil {
+		return nil, err
 	}
-	return res.GasLimit, nil
-}
-
-func (b *Block) GasUsed() (string, error) {
-	var res extra.ExtraBlock
-	if err := proto.Unmarshal(b.extra.Data, &res); err != nil {
-		return "", err
+	g, ok := big.NewInt(0).SetString(exBlockShared.GasUsed, 0)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse difficulty")
 	}
-	return res.GasUsed, nil
+	return g, nil
 }
