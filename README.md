@@ -1,24 +1,26 @@
 # Forefinger
 
-Forefinger - это высокопроизводительная Go библиотека для взаимодействия с Ethereum JSON-RPC API. Библиотека предлагает
-оптимизированный и удобный интерфейс для работы с Ethereum узлами.
+Forefinger is a high-performance Go library for interacting with Ethereum JSON-RPC API. It simplifies working with
+Ethereum nodes by providing an optimized connection pool, efficient memory management, and a streamlined interface. The
+library reduces the complexity of handling RPC requests, parsing responses, and managing concurrent connections,
+allowing developers to focus on their application logic rather than infrastructure details.
 
-## Особенности
+## Features
 
-- Эффективная работа с пулом соединений
-- Пакетные вызовы для оптимизации производительности
-- Поддержка всех стандартных методов Ethereum JSON-RPC
-- Экономичное использование памяти благодаря внутренней структуре моделей данных
-- Поддержка фильтрации логов и событий
-- Интуитивно понятный API для Go разработчиков
+- Efficient connection pool management
+- Batch calls for performance optimization
+- Support for all standard Ethereum JSON-RPC methods
+- Memory-efficient data models with compressed storage for rarely used fields
+- Log and event filtering capabilities
+- Developer-friendly API for Go applications
 
-## Установка
+## Installation
 
 ```bash
 go get -u github.com/s4bb4t/forefinger
 ```
 
-## Быстрый старт
+## Quick Start
 
 ```go
 package main
@@ -31,135 +33,135 @@ import (
 )
 
 func main() {
-	// Создание клиента с указанием URL Ethereum узла и размера пула соединений
+	// Create a client with Ethereum node URL and connection pool size
 	c, err := client.NewClient("https://mainnet.infura.io/v3/YOUR-API-KEY", 5)
 	if err != nil {
 		panic(err)
 	}
 	defer c.Close()
 
-	// Получение последнего блока
+	// Get the latest block
 	block, err := c.BlockByNumber(context.Background(), nil)
 	if err != nil {
 		panic(err)
 	}
 
-	// Вывод номера блока
-	fmt.Printf("Последний блок: %s\n", block.Number())
+	// Print the block number
+	fmt.Printf("Latest block: %s\n", block.Number())
 }
 ```
 
-## Основные возможности
+## Core Capabilities
 
-### Инициализация клиента
+### Client Initialization
 
 ```go
-// Создание клиента с пулом из 5 соединений
+// Create a client with a pool of 5 connections
 client, err := client.NewClient("https://mainnet.infura.io/v3/YOUR-API-KEY", 5)
 if err != nil {
-// обработка ошибки
+// handle error
 }
 defer client.Close()
 ```
 
-### Запросы блоков и транзакций
+### Block and Transaction Queries
 
 ```go
-// Получение блока по номеру
+// Get block by number
 block, err := client.BlockByNumber(ctx, big.NewInt(14000000))
 
-// Получение блока по хешу
+// Get block by hash
 blockHash := common.HexToHash("0x...")
 block, err := client.BlockByHash(ctx, blockHash)
 
-// Получение транзакции по хешу
+// Get transaction by hash
 txHash := common.HexToHash("0x...")
 tx, err := client.TxByHash(ctx, txHash)
 
-// Получение квитанции транзакции
+// Get transaction receipt
 receipt, err := client.TxReceipt(ctx, txHash)
 ```
 
-### Работа с аккаунтами и смарт-контрактами
+### Account and Smart Contract Operations
 
 ```go
-// Получение баланса аккаунта
+// Get account balance
 address := common.HexToAddress("0x...")
 balance, err := client.Balance(ctx, address, nil)
 
-// Чтение кода смарт-контракта
+// Read smart contract code
 code, err := client.Code(ctx, address, nil)
 
-// Вызов метода смарт-контракта
-data := []byte{...} // ABI-кодированные данные вызова
+// Call smart contract method
+data := []byte{...} // ABI-encoded call data
 result, err := client.CallContract(ctx, address, data, nil)
 
-// Оценка газа для транзакции
+// Estimate gas for a transaction
 gas, err := client.EstimateGas(ctx, data, nil)
 ```
 
-### Работа с фильтрами и логами
+### Filters and Logs
 
 ```go
-// Создание нового фильтра
+// Create a new filter
 filter := models.NewFilter().
-FromBlock("latest"). // Начальный блок
-ToBlock(big.NewInt(14000000)). // Конечный блок
-Address("0x123...").           // Фильтрация по адресу контракта
-Topic("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef") // Event signature для Transfer
+FromBlock("latest"). // Starting block
+ToBlock(big.NewInt(14000000)). // End block
+Address("0x123...").           // Contract address filter
+Topic("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef") // Event signature for Transfer
 
-// Применение фильтра для получения логов
+// Apply filter to get logs
 logs, err := client.Logs(ctx, filter)
 
-// Создание и использование фильтра на стороне узла
+// Create and use node-side filter
 filterId, err := client.NewFilter(ctx, filter)
 if err != nil {
-// обработка ошибки
+// handle error
 }
 
-// Получение изменений для фильтра
+// Get filter changes
 changes, err := client.FilterChanges(ctx, filterId)
 
-// Удаление фильтра после использования
+// Remove filter after use
 client.UninstallFilter(ctx, filterId)
 ```
 
-## Пакетные запросы
+## Batch Requests
 
-Forefinger поддерживает два типа пакетных запросов для оптимизации производительности:
+Forefinger supports two types of batch requests for performance optimization:
 
 ### BatchCall
 
-Позволяет выполнить несколько однотипных запросов в одном HTTP-вызове:
+Executes multiple requests of the same type in a single HTTP call:
 
 ```go
-// Создание списка результатов
+// Create results slice
 results := make([]*big.Int, 10)
 
-// Создание списка аргументов
+// Create arguments slice
 args := make([][]any, 10)
 for i := 0; i < 10; i++ {
 args[i] = []any{common.HexToAddress(fmt.Sprintf("0x%x", i)), "latest"}
 }
 
-// Выполнение пакетного запроса балансов
+// Execute batch balance request
 err, errs := client.BatchCall(
 ctx,
-5, // размер пакета
+5, // batch size
 methods.Balance,
 args,
 &results,
 )
 
-// Проверка ошибок и обработка результатов
+// Check errors and process results
 ```
 
 ### SequenceBatchCall
 
-Позволяет выполнить последовательность разнотипных запросов:
+Executes a sequence of different request types:
 
 ```go
-// Создание последовательности запросов
+// Create sequence of requests
 sequence := methods.Sequence{
 {
 Method: methods.BlockByNumber,
@@ -173,51 +175,50 @@ Result: &balance,
 },
 }
 
-// Выполнение пакетного запроса
+// Execute batch request
 err, errs := client.SequenceBatchCall(ctx, 2, &sequence)
 ```
 
-## Структура модели данных
+## Data Model Structure
 
-Forefinger использует эффективную внутреннюю структуру для моделей данных, разделяя часто используемые и редко
-используемые поля:
+Forefinger uses an efficient internal structure for data models, separating commonly and rarely used fields:
 
 ```go
-// Получение информации о блоке
+// Get block information
 block, _ := client.BlockByNumber(ctx, nil)
 
-// Доступ к часто используемым полям (хранятся непосредственно в структуре)
+// Access frequently used fields (stored directly in the structure)
 blockNumber := block.Number() // *big.Int
 timestamp := block.Timestamp() // *big.Int
 txs := block.Transactions() // Transactions
 
-// Доступ к дополнительным полям (хранятся в сжатом формате)
+// Access additional fields (stored in compressed format)
 hash, _ := block.Hash() // common.Hash
 miner, _ := block.Miner() // common.Address
 difficulty, _ := block.Difficulty() // *big.Int
 ```
 
-## Конкурентная обработка
+## Concurrent Processing
 
-Библиотека обеспечивает безопасную конкурентную работу с использованием пула соединений:
+The library ensures safe concurrent operation using a connection pool:
 
 ```go
-// Создание клиента с пулом из 10 соединений
+// Create client with pool of 10 connections
 client, _ := client.NewClient("https://ethereum.node.url", 10)
 
-// Выполнение параллельных запросов
+// Execute parallel requests
 var wg sync.WaitGroup
 for i := 0; i < 20; i++ {
 wg.Add(1)
 go func (blockNum int64) {
 defer wg.Done()
 block, err := client.BlockByNumber(context.Background(), big.NewInt(blockNum))
-// обработка блока
+// process block
 }(int64(15000000 + i))
 }
 wg.Wait()
 ```
 
-## Лицензия
+## License
 
 [MIT License](LICENSE)
