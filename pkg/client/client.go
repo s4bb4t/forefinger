@@ -21,7 +21,6 @@ type (
 
 func NewClient(upstream string, velocity uint8) (*Client, error) {
 	pool := make([]*smart, velocity)
-
 	for i := range velocity {
 		client, err := rpc.Dial(upstream)
 		if err != nil {
@@ -29,7 +28,6 @@ func NewClient(upstream string, velocity uint8) (*Client, error) {
 		}
 		pool[i] = &smart{cl: client}
 	}
-
 	return &Client{pool: pool, max: velocity - 1}, nil
 }
 
@@ -42,11 +40,11 @@ func (c *Client) client() (*rpc.Client, func()) {
 	defer c.Unlock()
 
 	for !c.pool[c.idx].TryLock() {
+		c.idx++
+
 		if c.idx == c.max {
 			c.idx = 0
 		}
-
-		c.idx++
 	}
 
 	releaseFunc := c.pool[c.idx].Unlock
