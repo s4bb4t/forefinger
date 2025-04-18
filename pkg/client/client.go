@@ -42,15 +42,12 @@ func (c *Client) client() (*rpc.Client, func()) {
 	for !c.pool[c.idx].TryLock() {
 		c.idx++
 
-		if c.idx == c.max {
+		if c.idx >= c.max {
 			c.idx = 0
 		}
 	}
 
-	releaseFunc := c.pool[c.idx].Unlock
-
-	c.idx++
-	return c.pool[c.idx].cl, releaseFunc
+	return c.pool[c.idx].cl, c.pool[c.idx].Unlock
 }
 
 func (c *Client) Close() {
