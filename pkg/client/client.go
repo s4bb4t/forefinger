@@ -30,7 +30,7 @@ func NewClient(upstream string, velocity uint8) (*Client, error) {
 		pool[i] = &smart{cl: client}
 	}
 
-	return &Client{pool: pool, max: velocity}, nil
+	return &Client{pool: pool, max: velocity - 1}, nil
 }
 
 func (c *Client) Client() (*rpc.Client, func()) {
