@@ -8,6 +8,14 @@ message ExtraTx {
   string nonce = 3;
   string transactionIndex = 4;
   string blockHash = 5;
+  repeated accessList access = 6;
+  string maxFeePerGas = 7;
+  string maxPriorityFeePerGas = 8;
+  string maxFeePerBlobGas = 9;
+  string blobVersionedHashes = 10;
+}
+message accessList {
+  string address = 1;
 }
 
 message ExtraBlock {

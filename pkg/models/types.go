@@ -21,6 +21,14 @@ const (
 	to        = "to"
 	input     = "input"
 
+	accessList           = "accessList"
+	maxFeePerGas         = "maxFeePerGas"
+	maxPriorityFeePerGas = "maxPriorityFeePerGas"
+	maxFeePerBlobGas     = "maxFeePerBlobGas"
+	blobVersionedHashes  = "blobVersionedHashes"
+	beaconRoot           = "beaconRoot"
+	chainId              = "chainId"
+
 	txs          = "transactions"
 	timestamp    = "timestamp"
 	size         = "size"

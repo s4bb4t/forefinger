@@ -22,14 +22,19 @@ const (
 )
 
 type ExtraTx struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	GasPrice         string                 `protobuf:"bytes,1,opt,name=gasPrice,proto3" json:"gasPrice,omitempty"`
-	Gas              string                 `protobuf:"bytes,2,opt,name=gas,proto3" json:"gas,omitempty"`
-	Nonce            string                 `protobuf:"bytes,3,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	TransactionIndex string                 `protobuf:"bytes,4,opt,name=transactionIndex,proto3" json:"transactionIndex,omitempty"`
-	BlockHash        string                 `protobuf:"bytes,5,opt,name=blockHash,proto3" json:"blockHash,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	GasPrice             string                 `protobuf:"bytes,1,opt,name=gasPrice,proto3" json:"gasPrice,omitempty"`
+	Gas                  string                 `protobuf:"bytes,2,opt,name=gas,proto3" json:"gas,omitempty"`
+	Nonce                string                 `protobuf:"bytes,3,opt,name=nonce,proto3" json:"nonce,omitempty"`
+	TransactionIndex     string                 `protobuf:"bytes,4,opt,name=transactionIndex,proto3" json:"transactionIndex,omitempty"`
+	BlockHash            string                 `protobuf:"bytes,5,opt,name=blockHash,proto3" json:"blockHash,omitempty"`
+	Access               []*AccessList          `protobuf:"bytes,6,rep,name=access,proto3" json:"access,omitempty"`
+	MaxFeePerGas         string                 `protobuf:"bytes,7,opt,name=maxFeePerGas,proto3" json:"maxFeePerGas,omitempty"`
+	MaxPriorityFeePerGas string                 `protobuf:"bytes,8,opt,name=maxPriorityFeePerGas,proto3" json:"maxPriorityFeePerGas,omitempty"`
+	MaxFeePerBlobGas     string                 `protobuf:"bytes,9,opt,name=maxFeePerBlobGas,proto3" json:"maxFeePerBlobGas,omitempty"`
+	BlobVersionedHashes  string                 `protobuf:"bytes,10,opt,name=blobVersionedHashes,proto3" json:"blobVersionedHashes,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *ExtraTx) Reset() {
@@ -97,6 +102,85 @@ func (x *ExtraTx) GetBlockHash() string {
 	return ""
 }
 
+func (x *ExtraTx) GetAccess() []*AccessList {
+	if x != nil {
+		return x.Access
+	}
+	return nil
+}
+
+func (x *ExtraTx) GetMaxFeePerGas() string {
+	if x != nil {
+		return x.MaxFeePerGas
+	}
+	return ""
+}
+
+func (x *ExtraTx) GetMaxPriorityFeePerGas() string {
+	if x != nil {
+		return x.MaxPriorityFeePerGas
+	}
+	return ""
+}
+
+func (x *ExtraTx) GetMaxFeePerBlobGas() string {
+	if x != nil {
+		return x.MaxFeePerBlobGas
+	}
+	return ""
+}
+
+func (x *ExtraTx) GetBlobVersionedHashes() string {
+	if x != nil {
+		return x.BlobVersionedHashes
+	}
+	return ""
+}
+
+type AccessList struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Address       string                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AccessList) Reset() {
+	*x = AccessList{}
+	mi := &file_extra_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessList) ProtoMessage() {}
+
+func (x *AccessList) ProtoReflect() protoreflect.Message {
+	mi := &file_extra_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessList.ProtoReflect.Descriptor instead.
+func (*AccessList) Descriptor() ([]byte, []int) {
+	return file_extra_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *AccessList) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
 type ExtraBlock struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	Uncles           []*Uncle               `protobuf:"bytes,1,rep,name=uncles,proto3" json:"uncles,omitempty"`
@@ -120,7 +204,7 @@ type ExtraBlock struct {
 
 func (x *ExtraBlock) Reset() {
 	*x = ExtraBlock{}
-	mi := &file_extra_proto_msgTypes[1]
+	mi := &file_extra_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -132,7 +216,7 @@ func (x *ExtraBlock) String() string {
 func (*ExtraBlock) ProtoMessage() {}
 
 func (x *ExtraBlock) ProtoReflect() protoreflect.Message {
-	mi := &file_extra_proto_msgTypes[1]
+	mi := &file_extra_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -145,7 +229,7 @@ func (x *ExtraBlock) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExtraBlock.ProtoReflect.Descriptor instead.
 func (*ExtraBlock) Descriptor() ([]byte, []int) {
-	return file_extra_proto_rawDescGZIP(), []int{1}
+	return file_extra_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ExtraBlock) GetUncles() []*Uncle {
@@ -262,7 +346,7 @@ type Uncle struct {
 
 func (x *Uncle) Reset() {
 	*x = Uncle{}
-	mi := &file_extra_proto_msgTypes[2]
+	mi := &file_extra_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -274,7 +358,7 @@ func (x *Uncle) String() string {
 func (*Uncle) ProtoMessage() {}
 
 func (x *Uncle) ProtoReflect() protoreflect.Message {
-	mi := &file_extra_proto_msgTypes[2]
+	mi := &file_extra_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -287,7 +371,7 @@ func (x *Uncle) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uncle.ProtoReflect.Descriptor instead.
 func (*Uncle) Descriptor() ([]byte, []int) {
-	return file_extra_proto_rawDescGZIP(), []int{2}
+	return file_extra_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Uncle) GetHash() string {
@@ -310,7 +394,7 @@ type ExtraReceipt struct {
 
 func (x *ExtraReceipt) Reset() {
 	*x = ExtraReceipt{}
-	mi := &file_extra_proto_msgTypes[3]
+	mi := &file_extra_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -322,7 +406,7 @@ func (x *ExtraReceipt) String() string {
 func (*ExtraReceipt) ProtoMessage() {}
 
 func (x *ExtraReceipt) ProtoReflect() protoreflect.Message {
-	mi := &file_extra_proto_msgTypes[3]
+	mi := &file_extra_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -335,7 +419,7 @@ func (x *ExtraReceipt) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExtraReceipt.ProtoReflect.Descriptor instead.
 func (*ExtraReceipt) Descriptor() ([]byte, []int) {
-	return file_extra_proto_rawDescGZIP(), []int{3}
+	return file_extra_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ExtraReceipt) GetLogsBloom() string {
@@ -377,13 +461,22 @@ var File_extra_proto protoreflect.FileDescriptor
 
 const file_extra_proto_rawDesc = "" +
 	"\n" +
-	"\vextra.proto\"\x97\x01\n" +
+	"\vextra.proto\"\xf2\x02\n" +
 	"\aExtraTx\x12\x1a\n" +
 	"\bgasPrice\x18\x01 \x01(\tR\bgasPrice\x12\x10\n" +
 	"\x03gas\x18\x02 \x01(\tR\x03gas\x12\x14\n" +
 	"\x05nonce\x18\x03 \x01(\tR\x05nonce\x12*\n" +
 	"\x10transactionIndex\x18\x04 \x01(\tR\x10transactionIndex\x12\x1c\n" +
-	"\tblockHash\x18\x05 \x01(\tR\tblockHash\"\xca\x03\n" +
+	"\tblockHash\x18\x05 \x01(\tR\tblockHash\x12#\n" +
+	"\x06access\x18\x06 \x03(\v2\v.accessListR\x06access\x12\"\n" +
+	"\fmaxFeePerGas\x18\a \x01(\tR\fmaxFeePerGas\x122\n" +
+	"\x14maxPriorityFeePerGas\x18\b \x01(\tR\x14maxPriorityFeePerGas\x12*\n" +
+	"\x10maxFeePerBlobGas\x18\t \x01(\tR\x10maxFeePerBlobGas\x120\n" +
+	"\x13blobVersionedHashes\x18\n" +
+	" \x01(\tR\x13blobVersionedHashes\"&\n" +
+	"\n" +
+	"accessList\x12\x18\n" +
+	"\aaddress\x18\x01 \x01(\tR\aaddress\"\xca\x03\n" +
 	"\n" +
 	"ExtraBlock\x12\x1e\n" +
 	"\x06uncles\x18\x01 \x03(\v2\x06.uncleR\x06uncles\x12\x1c\n" +
@@ -429,20 +522,22 @@ func file_extra_proto_rawDescGZIP() []byte {
 	return file_extra_proto_rawDescData
 }
 
-var file_extra_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_extra_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_extra_proto_goTypes = []any{
 	(*ExtraTx)(nil),      // 0: ExtraTx
-	(*ExtraBlock)(nil),   // 1: ExtraBlock
-	(*Uncle)(nil),        // 2: uncle
-	(*ExtraReceipt)(nil), // 3: ExtraReceipt
+	(*AccessList)(nil),   // 1: accessList
+	(*ExtraBlock)(nil),   // 2: ExtraBlock
+	(*Uncle)(nil),        // 3: uncle
+	(*ExtraReceipt)(nil), // 4: ExtraReceipt
 }
 var file_extra_proto_depIdxs = []int32{
-	2, // 0: ExtraBlock.uncles:type_name -> uncle
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 0: ExtraTx.access:type_name -> accessList
+	3, // 1: ExtraBlock.uncles:type_name -> uncle
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_extra_proto_init() }
@@ -456,7 +551,7 @@ func file_extra_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_extra_proto_rawDesc), len(file_extra_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

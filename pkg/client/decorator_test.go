@@ -98,7 +98,7 @@ func TestTxByHash(t *testing.T) {
 		t.Fatalf("TxByHash returned wrong transaction hash: %v", tx.Hash().String())
 	}
 
-	t.Logf("TxByHash: %+v", tx.Hash().String())
+	t.Logf("TxByHash: %+v", tx.Type())
 }
 
 func TestBlockTxCountByHash(t *testing.T) {

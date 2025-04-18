@@ -12,6 +12,14 @@ import (
 
 var exTxShared extra.ExtraTx
 
+const (
+	LegacyTxType     int8 = 0x00
+	AccessListTxType int8 = 0x01
+	DynamicFeeTxType int8 = 0x02
+	BlobTxType       int8 = 0x03
+	BeaconTxType     int8 = 0x04
+)
+
 type (
 	extraTx struct {
 		Data []byte
@@ -27,6 +35,7 @@ type (
 		Hash        common.Hash
 		From        common.Address
 		To          common.Address
+		Type        int8
 	}
 
 	Transaction struct {
@@ -98,6 +107,43 @@ func (t *Transaction) UnmarshalEasyJSON(w *jlexer.Lexer) {
 			t.inner.To = common.HexToAddress(w.String())
 		case input:
 			t.inner.Input = common.HexToHash(w.String())
+
+		case accessList:
+			if !w.IsNull() {
+				t.inner.Type = AccessListTxType
+			}
+			// TODO: implement access list unmarshaling
+			w.SkipRecursive()
+		case maxFeePerGas:
+			if !w.IsNull() {
+				t.inner.Type = DynamicFeeTxType
+			}
+			// TODO: implement Dynamic versioned hashes unmarshaling
+			w.SkipRecursive()
+		case maxPriorityFeePerGas:
+			if !w.IsNull() {
+				t.inner.Type = DynamicFeeTxType
+			}
+			// TODO: implement Dynamic versioned hashes unmarshaling
+			w.SkipRecursive()
+		case maxFeePerBlobGas:
+			if !w.IsNull() {
+				t.inner.Type = BlobTxType
+			}
+			// TODO: implement Blob versioned hashes unmarshaling
+			w.SkipRecursive()
+		case blobVersionedHashes:
+			if !w.IsNull() {
+				t.inner.Type = BlobTxType
+			}
+			// TODO: implement Blob versioned hashes unmarshaling
+			w.SkipRecursive()
+		case beaconRoot:
+			if !w.IsNull() {
+				t.inner.Type = BeaconTxType
+			}
+			// TODO: implement beacon root unmarshaling
+			w.SkipRecursive()
 		default:
 			w.SkipRecursive()
 		}
@@ -109,6 +155,11 @@ func (t *Transaction) UnmarshalEasyJSON(w *jlexer.Lexer) {
 	}
 	t.extra.Data = d
 	w.Delim('}')
+}
+
+// Type returns type of the transaction as int8.
+func (t *Transaction) Type() int8 {
+	return t.inner.Type
 }
 
 // BlockNumber returns the block number of the transaction as a *big.Int.
