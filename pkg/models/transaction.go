@@ -134,50 +134,62 @@ func (t *Transaction) UnmarshalEasyJSON(w *jlexer.Lexer) {
 			t.inner.Hash = common.HexToHash(w.String())
 		case from:
 			t.inner.From = common.HexToAddress(w.String())
-		case to:
-			if w.IsNull() {
-				t.inner.To = common.HexToAddress(w.String())
-			}
-			w.Skip()
 		case input:
 			t.inner.Input = common.HexToHash(w.String())
-
+		case to:
+			if !w.IsNull() {
+				t.inner.To = common.HexToAddress(w.String())
+			} else {
+				w.SkipRecursive()
+			}
 		case accessList:
 			if !w.IsNull() {
+				// TODO: implement access list unmarshalling
 				t.inner.Type = AccessListTxType
+				w.SkipRecursive()
+			} else {
+				w.SkipRecursive()
 			}
-			// TODO: implement access list unmarshaling
-			w.SkipRecursive()
 		case maxFeePerGas:
 			if !w.IsNull() {
+				// TODO: implement Dynamic versioned hashes unmarshalling
 				t.inner.Type = DynamicFeeTxType
+				w.SkipRecursive()
+			} else {
+				w.SkipRecursive()
 			}
-			// TODO: implement Dynamic versioned hashes unmarshaling
-			w.SkipRecursive()
 		case maxPriorityFeePerGas:
 			if !w.IsNull() {
+				// TODO: implement Dynamic versioned hashes unmarshalling
 				t.inner.Type = DynamicFeeTxType
+				w.SkipRecursive()
+			} else {
+				w.SkipRecursive()
 			}
-			// TODO: implement Dynamic versioned hashes unmarshaling
-			w.SkipRecursive()
 		case maxFeePerBlobGas:
 			if !w.IsNull() {
+				// TODO: implement Blob versioned hashes unmarshalling
 				t.inner.Type = BlobTxType
+				w.SkipRecursive()
+			} else {
+				w.SkipRecursive()
 			}
-			// TODO: implement Blob versioned hashes unmarshaling
-			w.SkipRecursive()
 		case blobVersionedHashes:
 			if !w.IsNull() {
+				// TODO: implement Blob versioned hashes unmarshalling
 				t.inner.Type = BlobTxType
+				w.SkipRecursive()
+			} else {
+				w.SkipRecursive()
 			}
-			// TODO: implement Blob versioned hashes unmarshaling
-			w.SkipRecursive()
 		case beaconRoot:
 			if !w.IsNull() {
+				// TODO: implement beacon root unmarshalling
 				t.inner.Type = BeaconTxType
+				w.SkipRecursive()
+			} else {
+				w.SkipRecursive()
 			}
-			// TODO: implement beacon root unmarshaling
-			w.SkipRecursive()
 		default:
 			w.SkipRecursive()
 		}
