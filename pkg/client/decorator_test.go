@@ -2,24 +2,30 @@ package client
 
 import (
 	"context"
+	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/s4bb4t/forefinger/pkg/models"
 	"math/big"
+	"strings"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
 )
 
 const (
-	testAddressHex = "0x3fBBA2b0e07895ae8638D17fd83d72338954D272"
-	testBlockHash  = "0xdf29aafca34c510304dffd0182ea648afe84efd463f9752bfb35de71d3423b37"
-	testTxHashs    = "0xc48d5e8a0f2746cd885d9246fbfa083e5bd435c607ddbacd4680863ab66deb84"
-	latest         = "latest"
-	blockNumber    = 22281939
+	testContractHex = "0xe6313d1776E4043D906D5B7221BE70CF470F5e87"
+	testAddressHex  = "0xEE2213567A282c1e489Cfa4242B06fEebd087203"
+	testBlockHash   = "0xdf29aafca34c510304dffd0182ea648afe84efd463f9752bfb35de71d3423b37"
+	testTxHashHex   = "0xc48d5e8a0f2746cd885d9246fbfa083e5bd435c607ddbacd4680863ab66deb84"
+	latest          = "latest"
+	blockNumber     = 22281939
 )
 
 var (
-	testAddress = common.HexToAddress(testAddressHex)
-	testHash    = common.HexToHash(testBlockHash)
-	testTxHash  = common.HexToHash(testTxHashs)
+	testContract = common.HexToAddress(testContractHex)
+	testAddress  = common.HexToAddress(testAddressHex)
+	testHash     = common.HexToHash(testBlockHash)
+	testTxHash   = common.HexToHash(testTxHashHex)
 )
 
 var cl, _ = NewClient("http://10.255.13.100:8545", 100)
@@ -144,20 +150,54 @@ func TestTxReceipt(t *testing.T) {
 	t.Logf("TxReceipt: %+v", receipt.TransactionHash().String())
 }
 
-//func TestLogs(t *testing.T) {
-//	ctx := context.Background()
-//	topics := [][]common.Hash{
-//		{common.HexToHash("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")},
-//	}
-//
-//	logs, err := cl.Logs(ctx, testAddress, topics, big.NewInt(1234567))
-//	if err != nil {
-//		t.Fatalf("Logs failed: %v", err)
-//	}
-//
-//	if logs == nil {
-//		t.Fatal("Logs returned nil logs")
-//	}
-//
-//	t.Logf("Logs: %+v", logs)
-//}
+func TestBlockNumber(t *testing.T) {
+	ctx := context.Background()
+
+	bn, err := cl.BlockNumber(ctx)
+	if err != nil {
+		t.Fatalf("BlockNumber failed: %v", err)
+	}
+
+	if bn == nil {
+		t.Fatal("BlockNumber returned nil receipt")
+	}
+
+	t.Logf("BlockNumber: %+v", bn.String())
+}
+
+func TestCallContract(t *testing.T) {
+	ctx := context.Background()
+
+	erc721ABI := `[{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
+
+	abiObj, err := abi.JSON(strings.NewReader(erc721ABI))
+	if err != nil {
+		t.Fatalf("Ошибка при парсинге ABI: %v", err)
+	}
+
+	data, err := abiObj.Pack("balanceOf", testAddress)
+	if err != nil {
+		t.Fatalf("Ошибка при упаковке данных: %v", err)
+	}
+
+	msg := models.NewCallMsg().To(testContract).Data(data)
+	result, err := cl.CallContract(ctx, msg, "latest")
+	if err != nil {
+		t.Logf("CallContract завершился с ошибкой: %v", err)
+		return
+	}
+
+	if result == nil {
+		t.Fatal("CallContract вернул nil результат")
+	}
+
+	fmt.Println(result)
+
+	var balance *big.Int
+	err = abiObj.UnpackIntoInterface(&balance, "balanceOf", result)
+	if err != nil {
+		t.Logf("Ошибка при распаковке результата: %v", err)
+	} else {
+		t.Logf("Баланс токенов: %v", balance.String())
+	}
+}

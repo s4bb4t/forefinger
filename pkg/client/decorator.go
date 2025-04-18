@@ -3,10 +3,17 @@ package client
 import (
 	"context"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/s4bb4t/forefinger/pkg/methods"
 	"github.com/s4bb4t/forefinger/pkg/models"
 	"math/big"
 )
+
+// BlockNumber returns pointer to allocated and initialized latest block number and call error if not nil.
+func (c *Client) BlockNumber(ctx context.Context) (*big.Int, error) {
+	var block Int
+	return block.n, c.Call(ctx, &block, methods.BlockNumber)
+}
 
 // BlockByNumber returns pointer to allocated and initialized models.Block and call error if not nil.
 func (c *Client) BlockByNumber(ctx context.Context, number *big.Int) (*models.Block, error) {
@@ -99,12 +106,13 @@ func (c *Client) Code(ctx context.Context, address common.Address, block *big.In
 }
 
 // CallContract executes a smart contract call with the given address, data, and block, returning the result or an error.
-func (c *Client) CallContract(ctx context.Context, address common.Address, data []byte, block *big.Int) (*[]byte, error) {
-	var cd models.Code
-	return &cd.Value, c.Call(ctx, &cd, methods.Call, map[string]interface{}{
-		"to":   address.Hex(),
-		"data": common.Bytes2Hex(data),
-	}, block)
+func (c *Client) CallContract(ctx context.Context, msg *models.CallMsg, block any) ([]byte, error) {
+	var hex hexutil.Bytes
+	err := c.Call(ctx, &hex, methods.Call, msg.ToCallArg(), block)
+	if err != nil {
+		return nil, err
+	}
+	return hex, nil
 }
 
 // EstimateGas estimates the gas needed to execute a given transaction without submitting it to the blockchain.

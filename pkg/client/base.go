@@ -10,9 +10,11 @@ import (
 	"math/big"
 )
 
-type Int struct {
-	n *big.Int
-}
+type (
+	Int struct {
+		n *big.Int
+	}
+)
 
 func (i *Int) UnmarshalJSON(data []byte) error {
 	return easyjson.Unmarshal(data, i)

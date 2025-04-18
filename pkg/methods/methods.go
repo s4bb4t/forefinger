@@ -21,6 +21,7 @@ const (
 	Code                        Method = "eth_getCode"
 	Call                        Method = "eth_call"
 	EstimateGas                 Method = "eth_estimateGas"
+	BlockNumber                        = "eth_blockNumber"
 	Logs                        Method = "eth_getLogs"
 	NewFilter                   Method = "eth_newFilter"
 	NewBlockFilter              Method = "eth_newBlockFilter"
