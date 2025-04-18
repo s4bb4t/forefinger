@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/mailru/easyjson"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/s4bb4t/forefinger/proto/extra"
@@ -45,6 +46,36 @@ type (
 
 	Transactions []Transaction
 )
+
+// RecoverSender восстанавливает адрес отправителя транзакции из значений подписи (v, r, s)
+func (t *Transaction) RecoverSender(chainID *big.Int) (common.Address, error) {
+	v := t.V()
+	r := t.R()
+	s := t.S()
+
+	if t.Type() == LegacyTxType && chainID != nil && chainID.Sign() != 0 {
+		v = new(big.Int).Sub(v, new(big.Int).Add(new(big.Int).Mul(chainID, big.NewInt(2)), big.NewInt(35)))
+	} else if v.Cmp(big.NewInt(27)) >= 0 {
+		v = new(big.Int).Sub(v, big.NewInt(27))
+	}
+
+	sig := make([]byte, 65)
+	rBytes := r.Bytes()
+	sBytes := s.Bytes()
+
+	copy(sig[32-len(rBytes):32], rBytes)
+	copy(sig[64-len(sBytes):64], sBytes)
+	sig[64] = byte(v.Uint64())
+
+	hash := t.Hash()
+
+	pubKey, err := crypto.SigToPub(hash.Bytes(), sig)
+	if err != nil {
+		return common.Address{}, fmt.Errorf("невозможно восстановить публичный ключ: %w", err)
+	}
+
+	return crypto.PubkeyToAddress(*pubKey), nil
+}
 
 func (t *Transactions) UnmarshalJSON(bytes []byte) error {
 	return easyjson.Unmarshal(bytes, t)

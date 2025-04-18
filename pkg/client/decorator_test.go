@@ -16,7 +16,7 @@ const (
 	testContractHex = "0xe6313d1776E4043D906D5B7221BE70CF470F5e87"
 	testAddressHex  = "0xEE2213567A282c1e489Cfa4242B06fEebd087203"
 	testBlockHash   = "0xdf29aafca34c510304dffd0182ea648afe84efd463f9752bfb35de71d3423b37"
-	testTxHashHex   = "0xc48d5e8a0f2746cd885d9246fbfa083e5bd435c607ddbacd4680863ab66deb84"
+	testTxHashHex   = "0x6b9c691cc57f60b0c9cbbbd4b9ac6a2091982c9ec312947379aa6d59a2bd426c"
 	latest          = "latest"
 	blockNumber     = 22281939
 )
@@ -98,7 +98,9 @@ func TestTxByHash(t *testing.T) {
 		t.Fatalf("TxByHash returned wrong transaction hash: %v", tx.Hash().String())
 	}
 
-	t.Logf("TxByHash: %+v", tx.Type())
+	t.Logf("TxByHash: %+v", tx.Hash())
+	sender, err := tx.RecoverSender(big.NewInt(1))
+	t.Logf("from: %v or %v  to: %v", sender, tx.From(), tx.To())
 }
 
 func TestBlockTxCountByHash(t *testing.T) {
