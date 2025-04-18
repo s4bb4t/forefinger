@@ -135,7 +135,10 @@ func (t *Transaction) UnmarshalEasyJSON(w *jlexer.Lexer) {
 		case from:
 			t.inner.From = common.HexToAddress(w.String())
 		case to:
-			t.inner.To = common.HexToAddress(w.String())
+			if w.IsNull() {
+				t.inner.To = common.HexToAddress(w.String())
+			}
+			w.Skip()
 		case input:
 			t.inner.Input = common.HexToHash(w.String())
 
