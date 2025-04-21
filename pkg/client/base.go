@@ -7,8 +7,8 @@ import (
 	"github.com/mailru/easyjson"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/s4bb4t/forefinger/pkg/methods"
+	"github.com/s4bb4t/forefinger/pkg/models"
 	"math/big"
-	"sync"
 )
 
 type (
@@ -32,48 +32,61 @@ func (c *Client) Call(ctx context.Context, res any, method methods.Method, args 
 	return cl.CallContext(ctx, res, method.Method(), args...)
 }
 
-// BatchCall executes len(result) request separated to batches whose size is determined by batchLim
-func (c *Client) BatchCall(ctx context.Context, batchLim int, method methods.Method, result []any, args [][]any) (error, []error) {
+// BatchCallTyped executes batch requests with typed results
+func BatchCallTyped[T any](ctx context.Context, c *Client, batchLim int, method methods.Method, results *[]T, args [][]any) (error, []error) {
 	if batchLim <= 0 {
 		return fmt.Errorf("batchLim must be positive"), nil
 	}
-	var wg sync.WaitGroup
-	errs := make([]error, len(result))
-	var err error
 
-	for i := 0; i < len(result); i += batchLim {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			batchSize := batchLim
-			if i+batchSize > len(result) {
-				batchSize = len(result) - i
+	errs := make([]error, len(*results))
+
+	for i := 0; i < len(*results); i += batchLim {
+		batchSize := batchLim
+		if i+batchSize > len(*results) {
+			batchSize = len(*results) - i
+		}
+
+		batch := make([]rpc.BatchElem, batchSize)
+
+		for j := 0; j < batchSize; j++ {
+			batch[j] = rpc.BatchElem{
+				Method: method.Method(),
+				Args:   args[i+j],
+				Result: &(*results)[i+j],
 			}
-			batch := make([]rpc.BatchElem, batchSize)
+		}
 
-			for j := 0; j < batchSize; j++ {
-				batch[j] = rpc.BatchElem{
-					Method: method.Method(),
-					Args:   args[i+j],
-					Result: &(result)[i+j],
-				}
-			}
-			cl, release := c.client()
-			err = cl.BatchCallContext(ctx, batch)
-			for j := 0; j < batchSize; j++ {
-				errs[i+j] = batch[j].Error
-			}
+		cl, release := c.client()
+		if err := cl.BatchCallContext(ctx, batch); err != nil {
+			return err, errs
+		}
 
-			release()
-		}()
-	}
+		for j := 0; j < batchSize; j++ {
+			errs[i+j] = batch[j].Error
+		}
 
-	wg.Wait()
-	if err != nil {
-		return err, errs
+		release()
 	}
 
 	return nil, errs
+}
+
+// BatchCall executes len(result) request separated to batches whose size is determined by batchLim
+func (c *Client) BatchCall(ctx context.Context, batchLim int, method methods.Method, result any, args [][]any) (error, []error) {
+	switch result.(type) {
+	case *[]models.Block:
+		return BatchCallTyped[models.Block](ctx, c, batchLim, method, result.(*[]models.Block), args)
+	case *[]models.Log:
+		return BatchCallTyped[models.Log](ctx, c, batchLim, method, result.(*[]models.Log), args)
+	case *[]models.Transaction:
+		return BatchCallTyped[models.Transaction](ctx, c, batchLim, method, result.(*[]models.Transaction), args)
+	case *[]models.Receipt:
+		return BatchCallTyped[models.Receipt](ctx, c, batchLim, method, result.(*[]models.Receipt), args)
+	case *[]models.Logs:
+		return BatchCallTyped[models.Logs](ctx, c, batchLim, method, result.(*[]models.Logs), args)
+	default:
+		return fmt.Errorf("unsupported type: %T", result), nil
+	}
 }
 
 // TODO: implement batch call for BlockByNumber and so on
@@ -116,44 +129,7 @@ func (c *Client) BatchCall(ctx context.Context, batchLim int, method methods.Met
 //}
 
 /*
-// BatchCallTyped executes batch requests with typed results
-func BatchCallTyped[T any](ctx context.Context,c *Client, batchLim int, method methods.Method, results *[]T, args [][]any) (error, []error) {
-	if batchLim <= 0 {
-		return fmt.Errorf("batchLim must be positive"), nil
-	}
 
-	errs := make([]error, len(*results))
-
-	for i := 0; i < len(*results); i += batchLim {
-		batchSize := batchLim
-		if i+batchSize > len(*results) {
-			batchSize = len(*results) - i
-		}
-
-		batch := make([]rpc.BatchElem, batchSize)
-
-		for j := 0; j < batchSize; j++ {
-			batch[j] = rpc.BatchElem{
-				Method: method.Method(),
-				Args:   args[i+j],
-				Result: &(*results)[i+j],
-			}
-		}
-
-		cl, release := c.client()
-		if err := cl.BatchCallContext(ctx, batch); err != nil {
-			return err, errs
-		}
-
-		for j := 0; j < batchSize; j++ {
-			errs[i+j] = batch[j].Error
-		}
-
-		release()
-	}
-
-	return nil, errs
-}
 
 // CreateBatchCall создает массив результатов указанного типа и выполняет запросы пакетами
 func  CreateBatchCall[T any](ctx context.Context, c *Client, batchLim int, method methods.Method, count int, args [][]any) (*[]T, error, []error) {

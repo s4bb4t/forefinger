@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-var l = 2000
+var l = 100
 
 func TestSingle(t *testing.T) {
 	cl, err := client.NewClient("http://10.255.13.100:8545", 100)
@@ -59,17 +59,17 @@ func TestBatch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	blocks := make([]any, l)
+	blocks := make([]models.Block, l)
 	args := make([][]any, l)
 	for i := 0; i < l; i++ {
-		blocks[i] = models.Block{}
 		args[i] = []any{big.NewInt(22000000 + int64(i)), true}
 	}
 
-	err, _ = cl.BatchCall(context.Background(), 100, methods.BlockByNumber, blocks, args)
+	err, _ = cl.BatchCall(context.Background(), 100, methods.BlockByNumber, &blocks, args)
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Printf("%T\n", blocks[0])
 }
 
 func Benchmark_GoEthereum_Single(b *testing.B) {
